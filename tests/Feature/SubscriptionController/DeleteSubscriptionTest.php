@@ -16,7 +16,7 @@ class DeleteSubscriptionTest extends TestCase
     {
         $subscription = Subscription::factory()->create();
 
-        $url = sprintf("/api/v1/subscriptions/%d", 1);
+        $url = sprintf("/api/v1/subscriptions/%d", $subscription->id);
         $response = $this->json(Request::METHOD_DELETE, $url);
 
         $response->assertNoContent();
