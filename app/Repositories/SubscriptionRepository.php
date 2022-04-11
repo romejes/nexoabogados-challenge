@@ -36,15 +36,14 @@ class SubscriptionRepository extends BaseRepository
     }
 
     /**
-     * Cambia la propiedad is_active
+     * Cambia la propiedad is_active y la vuelve inactiva
      *
      * @param int $subscriptionId
-     * @param boolean $active
      * @return \Illuminate\Database\Eloquent\Model
      */
-    public function toggleIsActive($subscriptionId, $active = true)
+    public function changeToInactive($subscriptionId)
     {
-        return $this->update(["is_active" => $active], $subscriptionId);
+        return $this->update(["is_active" => false], $subscriptionId);
     }
 
     /**

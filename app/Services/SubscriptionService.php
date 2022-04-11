@@ -89,6 +89,26 @@ class SubscriptionService
         return $subscription;
     }
 
+    /**
+     * Cancela una suscripcion volviendola inactiva
+     *
+     * @param int $subscriptionId
+     * @return void
+     */
+    public function cancelSubscription($subscriptionId)
+    {
+        $subscription = $this->getSubscriptionById($subscriptionId);
+        if (!$subscription->is_active) {
+            return;
+        }
+
+        $subscription = $this->subscriptionRepository->changeToInactive($subscription->id, false);
+
+        if ($subscription->is_active) {
+            throw new Exception("No se pudo cancelar la subscripcion");
+        }
+    }
+
 
 
 

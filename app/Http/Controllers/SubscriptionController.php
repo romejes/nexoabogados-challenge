@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\SubscriptionService;
 use App\Http\Resources\SubscriptionResource;
 use App\Http\Requests\GetSubscriptionsRequest;
+use Symfony\Component\HttpFoundation\Response;
 
 class SubscriptionController extends Controller
 {
@@ -60,6 +61,7 @@ class SubscriptionController extends Controller
      */
     public function destroy($id)
     {
-
+        $this->subscriptionService->cancelSubscription($id);
+        return response()->json([], Response::HTTP_NO_CONTENT);
     }
 }
