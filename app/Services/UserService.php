@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Plan;
 use App\Models\User;
 use App\Repositories\PlanRepository;
 use App\Repositories\UserRepository;
@@ -116,5 +117,26 @@ class UserService
         $newSubscription = $this->subscriptionService->createSubscription($user, $plan);
 
         return $newSubscription;
+    }
+
+    /**
+     * Procedimiento para suscribirse a un plan sin que este suscrito previamente
+     * a ningun otro.
+     *
+     * @param \App\Models\User $user
+     * @param \App\Models\Plan $plan
+     * @return \App\Models\Subscription
+     * @throws BadRequestException
+     */
+    public function subscribe(User $user, Plan $plan)
+    {
+        $activeSubscription = $this->userRepository->getCurrentSubscription($user);
+        if ($activeSubscription) {
+            throw new BadRequestException("El usuario ya se encuentra suscrito a un plan");
+        }
+
+        $subscription = $this->subscriptionService->createSubscription($user, $plan);
+
+        return $subscription;
     }
 }

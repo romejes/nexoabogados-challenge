@@ -3,6 +3,7 @@
 use App\Http\Controllers\CurrentSubscriptionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\UserSubscriptionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,5 +27,9 @@ Route::middleware(['api'])->prefix("v1")->group(function () {
         Route::get("users/{id}/subscriptions/current", "show");
         Route::delete("users/{id}/subscriptions/current", "destroy");
         Route::put("users/{id}/subscriptions/current", "update");
+    });
+
+    Route::controller(UserSubscriptionController::class)->group(function () {
+        Route::post("users/{id}/subscriptions", "store");
     });
 });
