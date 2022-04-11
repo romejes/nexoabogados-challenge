@@ -4,10 +4,8 @@ namespace Tests\Feature\SubscriptionController;
 
 use Tests\TestCase;
 use App\Models\Subscription;
-use Illuminate\Foundation\Testing\WithFaker;
 use Symfony\Component\HttpFoundation\Request;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\DatabaseTransactions;
 
 class GetSubscriptionsTest extends TestCase
 {
@@ -32,6 +30,8 @@ class GetSubscriptionsTest extends TestCase
                 "plan"
             ]
         ]);
+
+        $this->assertIsArray($response->getData());
     }
 
     public function test_get_active_subscriptions()
@@ -54,6 +54,7 @@ class GetSubscriptionsTest extends TestCase
                 "plan"
             ]
         ]);
+        $this->assertIsArray($response->getData());
     }
 
     public function test_get_inactive_subscriptions()
@@ -76,6 +77,7 @@ class GetSubscriptionsTest extends TestCase
                 "plan"
             ]
         ]);
+        $this->assertIsArray($response->getData());
     }
 
     public function test_invalid_parameter()

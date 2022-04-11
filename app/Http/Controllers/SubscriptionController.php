@@ -46,7 +46,10 @@ class SubscriptionController extends Controller
      */
     public function show($id)
     {
+        $subscription = $this->subscriptionService->getSubscriptionById($id);
+        $subscription = new SubscriptionResource($subscription);
 
+        return response()->json($subscription);
     }
 
     /**

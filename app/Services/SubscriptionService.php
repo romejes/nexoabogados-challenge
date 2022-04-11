@@ -71,6 +71,24 @@ class SubscriptionService
         return $this->subscriptionRepository->getInactive();
     }
 
+    /**
+     * Obtiene una suscripcion por su ID
+     *
+     * @param integer $subscriptionId
+     * @return \Illuminate\Database\Eloquent\Model
+     * @throws ModelNotFoundException
+     */
+    public function getSubscriptionById($subscriptionId)
+    {
+        $subscription = $this->subscriptionRepository->getByID($subscriptionId);
+
+        if (!$subscription) {
+            throw new ModelNotFoundException("La suscripción no existe");
+        }
+
+        return $subscription;
+    }
+
 
 
 
@@ -114,23 +132,7 @@ class SubscriptionService
 
 
 
-    // /**
-    //  * Obtiene una suscripcion por su ID
-    //  *
-    //  * @param integer $subscriptionId
-    //  * @return \Illuminate\Database\Eloquent\Model
-    //  * @throws ModelNotFoundException
-    //  */
-    // public function getSubscriptionById($subscriptionId)
-    // {
-    //     $subscription = $this->subscriptionRepository->getByID($subscriptionId);
 
-    //     if (!$subscription) {
-    //         throw new ModelNotFoundException("La suscripción no existe");
-    //     }
-
-    //     return $subscription;
-    // }
 
     // /**
     //  * Cancela una suscripcion
