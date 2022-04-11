@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Services\SubscriptionService;
 use App\Http\Resources\SubscriptionResource;
 use App\Http\Requests\GetSubscriptionsRequest;

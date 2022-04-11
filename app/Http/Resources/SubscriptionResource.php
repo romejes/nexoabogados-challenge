@@ -19,8 +19,8 @@ class SubscriptionResource extends JsonResource
             "start_date"        =>  $this->start_date,
             "expiration_date"   =>  $this->expiration_date,
             "is_active"         =>  $this->is_active,
-            "user"              =>  $this->user,
-            "plan"              =>  $this->plan
+            "user"              =>  new UserResource($this->user),
+            "plan"              =>  new PlanResource($this->plan)
         ];
     }
 }

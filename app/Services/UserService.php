@@ -2,11 +2,12 @@
 
 namespace App\Services;
 
-use App\Models\Plan;
+use Exception;
+use Carbon\Carbon;
 use App\Models\User;
 use App\Repositories\PlanRepository;
 use App\Repositories\UserRepository;
-use Exception;
+use App\Repositories\SubscriptionRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -19,30 +20,30 @@ class UserService
     protected $userRepository;
 
     /**
-     * @var \App\Services\SubscriptionService
+     * @var \App\Repositories\SubscriptionRepository
      */
-    protected $subscriptionService;
+    protected $subscriptionRepository;
 
     /**
-     * @var \App\Services\PlanService
+     * @var \App\Repositories\PlanRepository
      */
-    protected $planService;
+    protected $planRepository;
 
     /**
      * Constructor
      *
      * @param UserRepository $userRepository
-     * @param SubscriptionService $subscriptionService
-     * @param PlanService $planService
+     * @param SubscriptionRepository $subscriptionRepository
+     * @param PlanRepository $planRepository
      */
     public function __construct(
         UserRepository $userRepository,
-        SubscriptionService $subscriptionService,
-        PlanService $planService
+        SubscriptionRepository $subscriptionRepository,
+        PlanRepository $planRepository
     ) {
         $this->userRepository = $userRepository;
-        $this->subscriptionService = $subscriptionService;
-        $this->planService = $planService;
+        $this->subscriptionRepository = $subscriptionRepository;
+        $this->planRepository = $planRepository;
     }
 
     /**
@@ -89,7 +90,11 @@ class UserService
     {
         $subscription = $this->getCurrentSubscriptionOfUser($user);
 
-        $this->subscriptionService->cancelSubscription($subscription->id);
+        if (!$subscription->is_active) {
+            return;
+        }
+
+        $subscription = $this->subscriptionRepository->changeToInactive($subscription->id, false);
     }
 
     /**
@@ -102,7 +107,10 @@ class UserService
      */
     public function changeSubscriptionPlan($userId, $planId)
     {
-        $plan = $this->planService->getPlanByID($planId);
+        $plan = $this->planRepository->getByID($planId);
+        if (!$plan) {
+            throw new ModelNotFoundException("El plan no existe");
+        }
 
         $user = $this->getUserById($userId);
 
@@ -112,9 +120,18 @@ class UserService
             throw new BadRequestHttpException("No puedes cambiarte a tu mismo plan actual");
         }
 
-        $this->subscriptionService->cancelSubscription($activeSubscription->id);
+        $this->subscriptionRepository->changeToInactive($activeSubscription->id, false);
 
-        $newSubscription = $this->subscriptionService->createSubscription($user, $plan);
+        $expirationDate = Carbon::now()->addMinutes(
+            config("constants.subscriptions.minutes_for_expiration")
+        );
+
+        $newSubscription = $this->subscriptionRepository->insert([
+            "user_id"           =>  $user->id,
+            "expiration_date"   =>  $expirationDate,
+            "is_active"         =>  true,
+            "plan_id"           =>  $plan->id
+        ]);
 
         return $newSubscription;
     }
@@ -128,15 +145,32 @@ class UserService
      * @return \App\Models\Subscription
      * @throws BadRequestException
      */
-    public function subscribe(User $user, Plan $plan)
+    public function subscribe($userId, $planId)
     {
+        $user = $this->getUserById($userId);
+
+        $plan = $this->planRepository->getByID($planId);
+        if (!$plan) {
+            throw new ModelNotFoundException("El plan no existe");
+        }
+
         $activeSubscription = $this->userRepository->getCurrentSubscription($user);
+
         if ($activeSubscription) {
             throw new BadRequestException("El usuario ya se encuentra suscrito a un plan");
         }
 
-        $subscription = $this->subscriptionService->createSubscription($user, $plan);
+        $expirationDate = Carbon::now()->addMinutes(
+            config("constants.subscriptions.minutes_for_expiration")
+        );
 
-        return $subscription;
+        $subscriptionRegistered = $this->subscriptionRepository->insert([
+            "user_id"           =>  $user->id,
+            "expiration_date"   =>  $expirationDate,
+            "is_active"         =>  true,
+            "plan_id"           =>  $plan->id
+        ]);
+
+        return $subscriptionRegistered;
     }
 }

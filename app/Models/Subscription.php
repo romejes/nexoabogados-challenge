@@ -36,8 +36,8 @@ class Subscription extends Model
      */
     protected $casts = [
         "is_active"         =>  "boolean",
-        "start_date"        =>  "datetime",
-        "expiration_date"   =>  "datetime"
+        // "start_date"        =>  "datetime",
+        // "expiration_date"   =>  "datetime"
     ];
 
     /**
@@ -65,5 +65,15 @@ class Subscription extends Model
     public function plan()
     {
         return $this->belongsTo(Plan::class, "plan_id", "id");
+    }
+
+    /**
+     * Establece una relacion 1:n con el modelo Payment
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function payments()
+    {
+        return $this->hasMany(Payment::class, "subscription_id", "id");
     }
 }

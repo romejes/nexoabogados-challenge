@@ -11,7 +11,8 @@ class SubscriptionRepository extends BaseRepository
      *
      * @param \Illuminate\Database\Eloquent\Model $subscription
      */
-    public function __construct(Subscription $subscription) {
+    public function __construct(Subscription $subscription)
+    {
         parent::__construct($subscription);
     }
 
@@ -60,5 +61,18 @@ class SubscriptionRepository extends BaseRepository
             "user_id"   =>  $userId,
             "plan_id"   =>  $planId
         ])->first();
+    }
+
+    /**
+     * Busca un registro de deuda de una suscripcion. Si no encuentra ninguno
+     * devuelve NULL
+     *
+     * @param int $subscriptionId
+     * @return mixed
+     */
+    public function findForDebt($subscription)
+    {
+        return null;
+        //return $subscription->payments->where(["is_paid" => true])->first();
     }
 }

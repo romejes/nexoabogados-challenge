@@ -15,23 +15,15 @@ class UserSubscriptionController extends Controller
      */
     protected $userService;
 
-     /**
-     * @var \App\Services\PlanService
-     */
-    protected $planService;
-
     /**
      * Constructor
      *
      * @param UserService $userService
-     * @param PlanService $planService
      */
     public function __construct(
-        UserService $userService,
-        PlanService $planService
+        UserService $userService
     ) {
         $this->userService = $userService;
-        $this->planService = $planService;
     }
 
     /**
@@ -43,14 +35,11 @@ class UserSubscriptionController extends Controller
      */
     public function store(CreateSubscriptionRequest $request, $userId)
     {
-        $plan = $this->planService->getPlanByID($request->input("plan_id"));
-        $user = $this->userService->getUserById($userId);
+        $planId = $request->input("plan_id");
 
-        $subscriptionRegistered = $this->userService->subscribe($user, $plan);
+        $subscriptionRegistered = $this->userService->subscribe($userId, $planId);
+        $subscriptionRegistered = new SubscriptionResource($subscriptionRegistered);
 
-        return response()->json(
-            new SubscriptionResource($subscriptionRegistered),
-            Response::HTTP_CREATED
-        );
+        return response()->json($subscriptionRegistered, Response::HTTP_CREATED);
     }
 }

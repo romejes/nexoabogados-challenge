@@ -5,6 +5,7 @@ namespace App\Services;
 use Exception;
 use Carbon\Carbon;
 use App\Models\Plan;
+use App\Models\Subscription;
 use App\Models\User;
 use App\Repositories\SubscriptionRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -17,9 +18,15 @@ class SubscriptionService
     protected $subscriptionRepository;
 
     /**
+     * @var \App\Services\PaymentService
+     */
+    protected $paymentService;
+
+    /**
      * Constructor
      *
      * @param SubscriptionRepository $subscriptionRepository
+     * @param PaymentService $paymentService
      */
     public function __construct(
         SubscriptionRepository $subscriptionRepository
@@ -108,74 +115,4 @@ class SubscriptionService
             throw new Exception("No se pudo cancelar la subscripcion");
         }
     }
-
-    /**
-     * Crea una suscripcion nueva
-     *
-     * @param \App\Models\User $user
-     * @param \App\Models\Plan $plan
-     * @return \App\Models\Subscription
-     */
-    public function createSubscription(User $user, Plan $plan)
-    {
-        $expirationDate = $this->setExpirationDate();
-        $subscriptionRegistered = $this->subscriptionRepository->insert([
-            "user_id"           =>  $user->id,
-            "expiration_date"   =>  $expirationDate,
-            "is_active"         =>  true,
-            "plan_id"           =>  $plan->id
-        ]);
-
-        return $subscriptionRegistered;
-    }
-
-    /**
-     * Establece la fecha y hora de vencimiento de una suscripcion
-     *
-     * @return \DateTime
-     */
-    private function setExpirationDate()
-    {
-        return Carbon::now()->addMinutes(
-            config("constants.subscriptions.minutes_for_expiration")
-        );
-    }
-
-    // /**
-    //  * Crea una suscripcion para un usuario
-    //  *
-    //  * @param int $userId
-    //  * @param int $planId
-    //  * @return \Illuminate\Database\Eloquent\Model
-    //  */
-    // public function createSubscription($userId, $planId)
-    // {
-    //     $user = $this->userRepository->getByID($userId);
-    //     if (!$user) {
-    //         throw new ModelNotFoundException("El usuario no existe");
-    //     }
-
-    //     $plan = $this->planRepository->getByID($planId);
-    //     if (!$plan) {
-    //         throw new ModelNotFoundException("El plan no existe");
-    //     }
-
-    //     //  TODO: Create a custom exception for this
-    //     $currentSubscription = $this->userRepository->getActiveSubscription($user->id);
-    //     if ($currentSubscription && $currentSubscription->plan_id === $plan->id) {
-    //         throw new Exception("No puedes suscribirte a un plan que estas usando en este momento");
-    //     }
-
-    //     $expirationDate = $this->setExpirationDate();
-    //     $subscriptionRegistered = $this->subscriptionRepository->insert([
-    //         "user_id"           =>  $userId,
-    //         "expiration_date"   =>  $expirationDate,
-    //         "is_active"         =>  true,
-    //         "plan_id"           =>  $planId
-    //     ]);
-
-    //     return $subscriptionRegistered;
-    // }
-
-
 }

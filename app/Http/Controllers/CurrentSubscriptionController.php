@@ -7,6 +7,7 @@ use App\Services\SubscriptionService;
 use App\Http\Resources\SubscriptionResource;
 use Symfony\Component\HttpFoundation\Response;
 use App\Http\Requests\UpdateSubscriptionRequest;
+use App\Services\PlanService;
 
 class CurrentSubscriptionController extends Controller
 {
@@ -21,6 +22,11 @@ class CurrentSubscriptionController extends Controller
     protected $userService;
 
     /**
+     * @var \App\Services\PlanService
+     */
+    protected $planService;
+
+    /**
      * Constructor
      *
      * @param SubscriptionService $subscriptionService
@@ -28,10 +34,12 @@ class CurrentSubscriptionController extends Controller
      */
     public function __construct(
         SubscriptionService $subscriptionService,
-        UserService $userService
+        UserService $userService,
+        PlanService $planService
     ) {
         $this->subscriptionService = $subscriptionService;
         $this->userService = $userService;
+        $this->planService = $planService;
     }
 
     /**
@@ -60,10 +68,9 @@ class CurrentSubscriptionController extends Controller
     {
         $planId = $request->input("plan_id");
         $newSubscription = $this->userService->changeSubscriptionPlan($userId, $planId);
+        $newSubscription = new SubscriptionResource($newSubscription);
 
-        return response()->json(
-            new SubscriptionResource($newSubscription)
-        );
+        return response()->json($newSubscription);
     }
 
     /**
@@ -78,30 +85,4 @@ class CurrentSubscriptionController extends Controller
         $this->userService->cancelSubscription($user);
         return response()->json([], Response::HTTP_NO_CONTENT);
     }
-
-
-
-
-
-    // /**
-    //  * [POST] users/{id}/subscriptions
-    //  *
-    //  * @param int $userId
-    //  * @param  \Illuminate\Http\Request  $request
-    //  * @return \Illuminate\Http\Response
-    //  */
-    // public function store(CreateSubscriptionRequest $request, $userId)
-    // {
-    //     $planId = $request->input("plan_id");
-    //     $subscriptionRegistered = $this->subscriptionService->createSubscription($userId, $planId);
-
-    //     return response()->json(
-    //         new SubscriptionResource($subscriptionRegistered),
-    //         Response::HTTP_CREATED
-    //     );
-    // }
-
-
-
-
 }
