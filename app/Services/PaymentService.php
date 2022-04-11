@@ -64,8 +64,7 @@ class PaymentService
         $maxAttempts = config("constants.subscriptions.max_attempts_for_payment");
 
         for ($i = 0; $i < $maxAttempts; $i++) {
-            // $paymentIsSuccesful = (bool)random_int(0, 1);
-            $paymentIsSuccesful = false;
+            $paymentIsSuccesful = (bool)random_int(0, 1);
             if ($paymentIsSuccesful) {
                 break;
             }
