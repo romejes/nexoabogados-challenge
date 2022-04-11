@@ -1,0 +1,303 @@
+openapi: "3.0.2"
+
+info:
+  title: NexoAbogados
+  version: "1.0"
+
+tags:
+  - name: "Users"
+    description: "Endpoints usados por el usuario"
+
+  - name: "Dashboard"
+    description: "Endpoints usados en el panel de contro"
+
+servers:
+  - url: https://localhost:8000/v1
+
+components:
+  requestBodies:
+    CreateSubscription:
+      description: "Request para crear una suscripcion"
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CreateSubscriptionRequest"
+
+    UpdateSubscription:
+      description: "Request para editar una suscripcion"
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/UpdateSubscriptionRequest"
+
+  schemas:
+    CreateSubscriptionRequest:
+      type: object
+      required:
+        - plan_id
+      properties:
+        plan_id:
+          type: integer
+          description: ID del plan
+
+    UpdateSubscriptionRequest:
+      type: object
+      required:
+        - "plan_id"
+      properties:
+        plan_id:
+          type: integer
+          description: ID del plan
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID del pago
+        subscription:
+          $ref: "#/components/schemas/Subscription"
+        is_paid:
+          type: boolean
+          description: Indica si la suscripcion esta pagada
+        payment_date:
+          type: string
+          format: date-time
+          nullable: true
+          description: Fecha de pago
+        attempts:
+          type: integer
+          description: "Numero de intentos de procesamiento de pago"
+          maximum: 3
+          nullable: true
+
+    Plan:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID del plan
+        name:
+          type: string
+          description: Nombre del plan
+        price:
+          type: number
+          format: double
+          description: Precio del plan
+
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID de la suscripcion
+        start_date:
+          type: string
+          format: date-time
+          description: "Fecha de registro de la suscripcion"
+        expiration_date:
+          type: string
+          format: date-time
+          description: "Fecha de vencimiento de la suscripcion"
+        is_active:
+          type: boolean
+          description: "Indica si la suscripcion esta activa"
+        user:
+          $ref: "#/components/schemas/User"
+        plan:
+          $ref: "#/components/schemas/Plan"
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        first_name:
+          type: string
+          description: "Nombre del usuario"
+        last_name:
+          type: string
+          description: "Apellidos del usuario"
+        email:
+          type: string
+          format: email
+          description: "Correo electronico del usuario"
+
+paths:
+  /subscriptions:
+    get:
+      tags:
+        - "Dashboard"
+      summary: "Obtiene todas las suscripciones"
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - active
+              - inactive
+      responses:
+        "200":
+          description: "Resultados obtenidos con exito"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Subscription"
+        "422":
+          description: "Parametros no válidos"
+
+  /subscriptions/{id}:
+    get:
+      tags:
+        - "Dashboard"
+      summary: Obtiene informacion de una suscripcion
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID de la suscripcion
+      responses:
+        "200":
+          description: "Resultados obtenidos"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscription"
+        "404":
+          description: "La suscripcion no existe"
+
+    delete:
+      tags:
+        - "Dashboard"
+      summary: Cancela una suscripcion
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID de la suscripcion
+      responses:
+        "204":
+          description: "Suscripcion cancelada"
+        "404":
+          description: "La suscripcion no existe"
+
+  /subscriptions/{id}/payment:
+    post:
+      tags:
+        - "Dashboard"
+      summary: "Realiza el proceso de pago"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID de la suscripcion
+      responses:
+        "201":
+          description: "Proceso de pago exitoso"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+
+        "400":
+          description: "Proceso de pago fallido"
+        "404":
+          description: "La suscripcion no existe"
+
+  /users/{id}/subscriptions:
+    post:
+      tags:
+        - "Users"
+      summary: "Crea una suscripción por primera vez"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID del usuario
+      requestBody:
+        $ref: "#/components/requestBodies/CreateSubscription"
+      responses:
+        "201":
+          description: "Subscripcion registrada"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscription"
+        "404":
+          description: "El usuario no existe"
+
+  /users/{id}/subscriptions/current:
+    get:
+      tags:
+        - "Users"
+      summary: "Obtiene la suscripcion actual de un usuario"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID del usuario
+      responses:
+        "200":
+          description: "Resultados obtenidos"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscription"
+        "404":
+          description: "El usuario no existe"
+
+    put:
+      tags:
+        - "Users"
+      summary: "Actualiza los datos de la suscripcion activa"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID del usuario
+      requestBody:
+        $ref: "#/components/requestBodies/UpdateSubscription"
+      responses:
+        "200":
+          description: "Subscripcion actualizada"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subscription"
+        "404":
+          description: "El usuario o suscripcion no existe"
+
+    delete:
+      tags:
+        - "Users"
+      summary: "Elimina la suscripcion actual"
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: ID del usuario
+      responses:
+        "204":
+          description: "Subscripcion eliminada"
+        "404":
+          description: "El usuario o suscripcion no existe"
