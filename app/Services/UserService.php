@@ -2,9 +2,13 @@
 
 namespace App\Services;
 
+use App\Models\User;
 use App\Repositories\PlanRepository;
 use App\Repositories\UserRepository;
+use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class UserService
 {
@@ -19,30 +23,36 @@ class UserService
     protected $subscriptionService;
 
     /**
+     * @var \App\Services\PlanService
+     */
+    protected $planService;
+
+    /**
      * Constructor
      *
-     * @param \App\Repositories\UserRepository $userRepository
-     * @param \App\Services\PlanService $planService
+     * @param UserRepository $userRepository
+     * @param SubscriptionService $subscriptionService
+     * @param PlanService $planService
      */
     public function __construct(
         UserRepository $userRepository,
-        SubscriptionService $subscriptionService
+        SubscriptionService $subscriptionService,
+        PlanService $planService
     ) {
         $this->userRepository = $userRepository;
         $this->subscriptionService = $subscriptionService;
+        $this->planService = $planService;
     }
 
     /**
      * Obtiene la suscripcion activa de un usuario. Si no posee devolvera una excepcion
      *
-     * @param int $userId
+     * @param \App\Models\User $user
      * @return \App\Models\Subscription
      * @throws ModelNotFoundException
      */
-    public function getCurrentSubscriptionOfUser($userId)
+    public function getCurrentSubscriptionOfUser(User $user)
     {
-        $user = $this->getUserById($userId);
-
         $currentSubscription = $this->userRepository->getCurrentSubscription($user);
         if (!$currentSubscription) {
             throw new ModelNotFoundException("El usuario no posee una suscripcion");
@@ -71,52 +81,40 @@ class UserService
     /**
      * Cancela la suscripcion por parte del usuario
      *
-     * @param int $userId
+     * @param \App\Models\User $userId
      * @return void
      */
-    public function cancelSubscription($userId)
+    public function cancelSubscription(User $user)
     {
-        $subscription = $this->getCurrentSubscriptionOfUser($userId);
+        $subscription = $this->getCurrentSubscriptionOfUser($user);
 
         $this->subscriptionService->cancelSubscription($subscription->id);
     }
 
+    /**
+     * Modifica la suscripcion de un usuario.
+     * Al cambiar de plan, se desuscribe del anterior y crea una nueva suscripcion con el nuevo plan
+     *
+     * @param int $userId
+     * @param int $planId
+     * @return \App\Models\Subscription
+     */
+    public function changeSubscriptionPlan($userId, $planId)
+    {
+        $plan = $this->planService->getPlanByID($planId);
 
-    // /**
-    //  * Modifica la suscripcion de un usuario.
-    //  * Al cambiar de plan, se desuscribe del anterior y crea una nueva suscripcion con el nuevo plan
-    //  *
-    //  * @param int $userId
-    //  * @param int $planId
-    //  * @return \App\Models\Subscription
-    //  */
-    // public function changeSubscriptionPlan($userId, $planId)
-    // {
-    //     $user = $this->getUser($userId);
+        $user = $this->getUserById($userId);
 
-    //     $plan = $this->planService->getPlan($planId);
+        $activeSubscription = $this->getCurrentSubscriptionOfUser($user);
 
-    //     $activeSubscription = $this->getUserCurrentSubscription($userId);
+        if ($activeSubscription->plan == $plan) {
+            throw new BadRequestHttpException("No puedes cambiarte a tu mismo plan actual");
+        }
 
-    //     $this->subscriptionService->cancelSubscription($activeSubscription->id);
+        $this->subscriptionService->cancelSubscription($activeSubscription->id);
 
-    //     $newSubscription = $this->subscriptionService->createSubscription($user->id, $plan->id);
+        $newSubscription = $this->subscriptionService->createSubscription($user, $plan);
 
-    //     return $newSubscription;
-    // }
-
-    // /**
-    //  * Cancela la subscripcion actual por parte del usuario
-    //  *
-    //  * @param int $userId
-    //  * @return void
-    //  */
-    // public function unsubscribe($userId)
-    // {
-    //     $user = $this->getUser($userId);
-
-    //     $activeSubscription = $this->getUserCurrentSubscription($user->id);
-
-    //     $this->subscriptionService->cancelSubscription($activeSubscription->id);
-    // }
+        return $newSubscription;
+    }
 }

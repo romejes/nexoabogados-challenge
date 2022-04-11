@@ -4,6 +4,6 @@ return [
     "subscriptions" =>  [
         "active"                    =>  "active",
         "inactive"                  =>  "inactive",
-        // "minutes_for_expiration"    =>  30
+        "minutes_for_expiration"    =>  30
     ]
 ];

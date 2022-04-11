@@ -6,7 +6,6 @@ use App\Services\UserService;
 use App\Services\SubscriptionService;
 use App\Http\Resources\SubscriptionResource;
 use Symfony\Component\HttpFoundation\Response;
-use App\Http\Requests\CreateSubscriptionRequest;
 use App\Http\Requests\UpdateSubscriptionRequest;
 
 class CurrentSubscriptionController extends Controller
@@ -43,12 +42,29 @@ class CurrentSubscriptionController extends Controller
      */
     public function show($userId)
     {
-        $subscription = $this->userService->getCurrentSubscriptionOfUser($userId);
+        $user = $this->userService->getUserById($userId);
+        $subscription = $this->userService->getCurrentSubscriptionOfUser($user);
         $subscription = new SubscriptionResource($subscription);
 
         return response()->json($subscription);
     }
 
+    /**
+     * [PUT] users/{id}/subscriptions/current
+     *
+     * @param UpdateSubscriptionRequest $request
+     * @param int $userId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(UpdateSubscriptionRequest $request, $userId)
+    {
+        $planId = $request->input("plan_id");
+        $newSubscription = $this->userService->changeSubscriptionPlan($userId, $planId);
+
+        return response()->json(
+            new SubscriptionResource($newSubscription)
+        );
+    }
 
     /**
      * [DELETE] users/{id}/subscriptions/current
@@ -58,7 +74,8 @@ class CurrentSubscriptionController extends Controller
      */
     public function destroy($userId)
     {
-        $this->userService->cancelSubscription($userId);
+        $user = $this->userService->getUserById($userId);
+        $this->userService->cancelSubscription($user);
         return response()->json([], Response::HTTP_NO_CONTENT);
     }
 
@@ -86,21 +103,5 @@ class CurrentSubscriptionController extends Controller
 
 
 
-    // /**
-    //  * [PUT] users/{id}/subscriptions/current
-    //  *
-    //  * @param  \Illuminate\Http\Request  $request
-    //  * @param  int  $id
-    //  * @return \Illuminate\Http\Response
-    //  */
-    // public function update(UpdateSubscriptionRequest $request, $userId)
-    // {
-    //     $planId = $request->input("plan_id");
-    //     $newSubscription = $this->userService->changeSubscriptionPlan($userId, $planId);
-
-    //     return response()->json(
-    //         new SubscriptionResource($newSubscription)
-    //     );
-    // }
 
 }

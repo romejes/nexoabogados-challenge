@@ -5,7 +5,6 @@ namespace Tests\Feature\CurrentSubscriptionController;
 use Tests\TestCase;
 use App\Models\User;
 use App\Models\Subscription;
-use Illuminate\Foundation\Testing\WithFaker;
 use Symfony\Component\HttpFoundation\Request;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 

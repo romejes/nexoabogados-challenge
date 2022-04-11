@@ -3,6 +3,9 @@
 namespace App\Services;
 
 use Exception;
+use Carbon\Carbon;
+use App\Models\Plan;
+use App\Models\User;
 use App\Repositories\SubscriptionRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -106,6 +109,38 @@ class SubscriptionService
         }
     }
 
+    /**
+     * Crea una suscripcion nueva
+     *
+     * @param \App\Models\User $user
+     * @param \App\Models\Plan $plan
+     * @return \App\Models\Subscription
+     */
+    public function createSubscription(User $user, Plan $plan)
+    {
+        $expirationDate = $this->setExpirationDate();
+        $subscriptionRegistered = $this->subscriptionRepository->insert([
+            "user_id"           =>  $user->id,
+            "expiration_date"   =>  $expirationDate,
+            "is_active"         =>  true,
+            "plan_id"           =>  $plan->id
+        ]);
+
+        return $subscriptionRegistered;
+    }
+
+    /**
+     * Establece la fecha y hora de vencimiento de una suscripcion
+     *
+     * @return \DateTime
+     */
+    private function setExpirationDate()
+    {
+        return Carbon::now()->addMinutes(
+            config("constants.subscriptions.minutes_for_expiration")
+        );
+    }
+
     // /**
     //  * Crea una suscripcion para un usuario
     //  *
@@ -142,15 +177,5 @@ class SubscriptionService
     //     return $subscriptionRegistered;
     // }
 
-    // /**
-    //  * Establece la fecha y hora de vencimiento de una suscripcion
-    //  *
-    //  * @return \DateTime
-    //  */
-    // private function setExpirationDate()
-    // {
-    //     return Carbon::now()->addMinutes(
-    //         config("constants.subscriptions.minutes_for_expiration")
-    //     );
-    // }
+
 }
