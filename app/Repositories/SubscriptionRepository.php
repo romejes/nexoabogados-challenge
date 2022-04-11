@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use Carbon\Carbon;
 use App\Models\Subscription;
 
 class SubscriptionRepository extends BaseRepository
@@ -72,7 +73,22 @@ class SubscriptionRepository extends BaseRepository
      */
     public function findForDebt($subscription)
     {
-        return null;
-        //return $subscription->payments->where(["is_paid" => true])->first();
+        return $subscription->payments
+            ->where("is_paid", false)
+            ->whereNotNull("attempts")
+            ->first();
+    }
+
+    /**
+     * Filtra las suscripciones activas por la fecha de expiracion
+     *
+     * @param DateTime $date
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getSubscriptionsForPaymentProcess()
+    {
+        return $this->model->where("is_active", true)
+            ->where("expiration_date", '<=', Carbon::now()->format('Y-m-d H:i:s'))
+            ->get();
     }
 }

@@ -35,6 +35,24 @@ class PaymentService
     }
 
     /**
+     * Realiza el proceso de pago de las suscripciones activas
+     *
+     * @return void
+     */
+    public function performBulkPayment()
+    {
+        $subscriptions = $this->subscriptionRepository->getSubscriptionsForPaymentProcess();
+
+        if (count($subscriptions) == 0) {
+            return;
+        }
+
+        foreach ($subscriptions as $subscription) {
+            $this->performPayment($subscription);
+        }
+    }
+
+    /**
      * Realiza el proceso de pago de una suscripcion
      *
      * @param Subscription $subscription
@@ -43,12 +61,11 @@ class PaymentService
     public function performPayment(Subscription $subscription)
     {
         $debt = $this->subscriptionRepository->findForDebt($subscription);
-
         $maxAttempts = config("constants.subscriptions.max_attempts_for_payment");
 
         for ($i = 0; $i < $maxAttempts; $i++) {
-            $paymentIsSuccesful = (bool)random_int(0, 1);
-
+            // $paymentIsSuccesful = (bool)random_int(0, 1);
+            $paymentIsSuccesful = false;
             if ($paymentIsSuccesful) {
                 break;
             }
@@ -96,16 +113,16 @@ class PaymentService
     /**
      * Modifica el estado de pago fallido a exitoso
      *
-     * @param int $paymentId
+     * @param \App\Models\Payment $payment
      * @return \App\Models\Payment
      */
-    private function switchToPaid($paymentId)
+    private function switchToPaid($payment)
     {
         return $this->paymentRepository->update([
             "is_paid"           =>  true,
             "payment_date"      =>  Carbon::now(),
             "attempts"          =>  null
-        ], $paymentId);
+        ], $payment->id);
     }
 
     /**
@@ -135,7 +152,7 @@ class PaymentService
         $maxAttemptsToUnsubscribe = config("constants.subscriptions.max_attempts_for_unsubscription");
 
         $attempts = $payment->attempts < $maxAttemptsToUnsubscribe ?
-            $payment->attempts++ :
+            $payment->attempts + 1 :
             $maxAttemptsToUnsubscribe;
 
         return $this->paymentRepository->update([

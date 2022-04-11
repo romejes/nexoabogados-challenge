@@ -32,7 +32,9 @@ class SubscriptionFactory extends Factory
                 return Plan::factory()->create();
             },
             "start_date"        =>  Carbon::now(),
-            "expiration_date"   =>  Carbon::now()->addMinutes(30),
+            "expiration_date"   =>  Carbon::now()->addMinutes(
+                config("constants.subscriptions.minutes_for_expiration")
+            ),
             "is_active"         =>  true
         ];
     }

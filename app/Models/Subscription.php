@@ -36,8 +36,8 @@ class Subscription extends Model
      */
     protected $casts = [
         "is_active"         =>  "boolean",
-        // "start_date"        =>  "datetime",
-        // "expiration_date"   =>  "datetime"
+        "start_date"        =>  "datetime:Y-m-d H:i",
+        "expiration_date"   =>  "datetime:Y-m-d H:i"
     ];
 
     /**

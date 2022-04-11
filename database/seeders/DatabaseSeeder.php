@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
     {
         $plans = Plan::factory()->count(2)->create();
 
-        for ($i=0; $i < 20; $i++) {
+        for ($i=0; $i < 3; $i++) {
             $user = User::factory()->create();
 
             $randomPlan = rand($plans[0]->id, $plans[1]->id);
