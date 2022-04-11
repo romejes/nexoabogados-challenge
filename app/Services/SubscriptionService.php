@@ -3,9 +3,6 @@
 namespace App\Services;
 
 use Exception;
-use Carbon\Carbon;
-use App\Repositories\PlanRepository;
-use App\Repositories\UserRepository;
 use App\Repositories\SubscriptionRepository;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -108,69 +105,6 @@ class SubscriptionService
             throw new Exception("No se pudo cancelar la subscripcion");
         }
     }
-
-
-
-
-
-
-    // /**
-    //  * @var \App\Repositories\UserRepository
-    //  */
-    // protected $userRepository;
-
-    // /**
-    //  * @var \App\Repositories\PlanRepository
-    //  */
-    // protected $planRepository;
-
-    // /**
-    //  * @var \App\Services\UserService
-    //  */
-    // protected $userService;
-
-    // /**
-    //  * Constructor
-    //  *
-    //  * @param \App\Repositories\SubscriptionRepository $subscriptionRepository
-    //  * @param \App\Repositories\UserRepository $userRepository
-    //  * @param \App\Repositories\PlanRepository $planRepository
-    //  */
-    // public function __construct(
-    //     SubscriptionRepository $subscriptionRepository,
-    //     UserRepository $userRepository,
-    //     PlanRepository $planRepository,
-    //     UserService $userService
-    // ) {
-    //     $this->subscriptionRepository = $subscriptionRepository;
-    //     $this->userRepository = $userRepository;
-    //     $this->planRepository = $planRepository;
-    //     $this->userService = $userService;
-    // }
-
-
-
-
-
-
-
-    // /**
-    //  * Cancela una suscripcion
-    //  *
-    //  * @param int $subscriptionId
-    //  * @return boolean
-    //  */
-    // public function cancelSubscription($subscriptionId)
-    // {
-    //     $subscription = $this->getSubscriptionById($subscriptionId);
-    //     $modifiedSubscription = $this->subscriptionRepository->toggleIsActive($subscription->id, false);
-
-    //     if ($modifiedSubscription->is_active) {
-    //         throw new Exception("No se pudo cancelar la subscripcion");
-    //     }
-
-    //     return true;
-    // }
 
     // /**
     //  * Crea una suscripcion para un usuario
