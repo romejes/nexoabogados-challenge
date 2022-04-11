@@ -3,6 +3,7 @@
 use App\Http\Controllers\CurrentSubscriptionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\SubscriptionPaymentController;
 use App\Http\Controllers\UserSubscriptionController;
 
 /*
@@ -31,5 +32,9 @@ Route::middleware(['api'])->prefix("v1")->group(function () {
 
     Route::controller(UserSubscriptionController::class)->group(function () {
         Route::post("users/{id}/subscriptions", "store");
+    });
+
+    Route::controller(SubscriptionPaymentController::class)->group(function () {
+        Route::post("subscriptions/{id}/payment", "store");
     });
 });
