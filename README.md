@@ -44,3 +44,9 @@ Donde se encuentran las clases que representan los form request para algunos end
 
 #### Http/Resources
 Aqui se define la plantilla del response de cada endpoint
+
+#### config/constants.php
+Aqui se define algunas constantes usadas en parte del codigo. Aqui se puede definir el tiempo de espera para procesar cada pago recurrente como tambien la cantidad de veces que se debe reintentar un pago, entre otros detalles.
+
+#### tests
+Aqui estan las pruebas de cada endpoint.
