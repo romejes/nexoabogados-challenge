@@ -1,7 +1,7 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SubscriptionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +14,10 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::middleware(['api'])->prefix("v1")->group(function () {
+    Route::controller(SubscriptionController::class)->group(function () {
+        Route::get("subscriptions", "index");
+        Route::get("subscriptions/{id}", "show");
+        Route::delete("subscriptions/{id}", "destroy");
+    });
 });
