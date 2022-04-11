@@ -50,6 +50,19 @@ class CurrentSubscriptionController extends Controller
     }
 
 
+    /**
+     * [DELETE] users/{id}/subscriptions/current
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($userId)
+    {
+        $this->userService->cancelSubscription($userId);
+        return response()->json([], Response::HTTP_NO_CONTENT);
+    }
+
+
 
 
 
@@ -90,15 +103,4 @@ class CurrentSubscriptionController extends Controller
     //     );
     // }
 
-    // /**
-    //  * [DELETE] users/{id}/subscriptions/current
-    //  *
-    //  * @param  int  $id
-    //  * @return \Illuminate\Http\Response
-    //  */
-    // public function destroy($userId)
-    // {
-    //     $this->userService->unsubscribe($userId);
-    //     return response()->json([], Response::HTTP_NO_CONTENT);
-    // }
 }

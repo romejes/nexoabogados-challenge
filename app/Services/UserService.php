@@ -68,23 +68,19 @@ class UserService
         return $user;
     }
 
-    // /**
-    //  * Obtiene la suscripcion actual de un usuario
-    //  *
-    //  * @param int $userId
-    //  * @return mixed
-    //  */
-    // public function getUserCurrentSubscription($userId)
-    // {
-    //     $user = $this->getUser($userId);
+    /**
+     * Cancela la suscripcion por parte del usuario
+     *
+     * @param int $userId
+     * @return void
+     */
+    public function cancelSubscription($userId)
+    {
+        $subscription = $this->getCurrentSubscriptionOfUser($userId);
 
-    //     $activeSubscription = $this->userRepository->getActiveSubscription($user->id);
-    //     if (!$activeSubscription) {
-    //         throw new ModelNotFoundException("No esta suscrito a ningun plan");
-    //     }
+        $this->subscriptionService->cancelSubscription($subscription->id);
+    }
 
-    //     return $activeSubscription;
-    // }
 
     // /**
     //  * Modifica la suscripcion de un usuario.

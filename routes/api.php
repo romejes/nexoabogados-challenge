@@ -24,5 +24,6 @@ Route::middleware(['api'])->prefix("v1")->group(function () {
 
     Route::controller(CurrentSubscriptionController::class)->group(function () {
         Route::get("users/{id}/subscriptions/current", "show");
+        Route::delete("users/{id}/subscriptions/current", "destroy");
     });
 });
